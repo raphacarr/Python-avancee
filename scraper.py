@@ -1,3 +1,9 @@
+ ##########################################################################################################
+ #                                                                                                        #
+ #                                              IMPORTS                                                   #
+ #                                                                                                        #
+ ##########################################################################################################
+
 from bs4 import BeautifulSoup
 import pandas as pd
 from selenium import webdriver
@@ -8,6 +14,12 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 from config import collection
 
+ ##########################################################################################################
+ #                                                                                                        #
+ #                                    BEAUTIFUL SOUP X SELENIUM                                           #
+ #                                                                                                        #
+ ##########################################################################################################
+ 
 url = "https://www.footmercato.net/joueur/"
 
 driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
@@ -57,6 +69,12 @@ df = pd.DataFrame(data, columns=headers)
 
 print(df)
 
+ ##########################################################################################################
+ #                                                                                                        #
+ #                                              MONGO DB                                                  #
+ #                                                                                                        #
+ ##########################################################################################################
+ 
 # Convertissez le DataFrame en une liste de dictionnaires
 player_list = df.to_dict('records')
 
@@ -68,3 +86,9 @@ if result.acknowledged:
     print(f"Documents insérés avec succès.")
 else:
     print("Échec de l'insertion des documents.")
+
+# Supprimer les documents où la colonne "Joueur" est nulle
+result = collection.delete_many({"Joueur": None})
+
+# Afficher le nombre de documents supprimés
+print(f"Nombre de valeurs nulles supprimées : {result.deleted_count}")
