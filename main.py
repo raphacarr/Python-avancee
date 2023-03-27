@@ -18,7 +18,6 @@ from config import collection
  ##########################################################################################################
 
 records = collection.find({}, {'_id': 0})
-# convertir les enregistrements en DataFrame pandas
 df = pd.DataFrame(list(records))
 
  ##########################################################################################################
@@ -26,16 +25,17 @@ df = pd.DataFrame(list(records))
  #                                          NETTOYAGE DATAFRAME                                           #
  #                                                                                                        #
  ##########################################################################################################
- 
-df["Âge"] = pd.to_numeric(df["Âge"], errors='coerce')
-df["Taille"] = pd.to_numeric(df["Taille"], errors='coerce')
-df["Poids"] = pd.to_numeric(df["Poids"], errors='coerce')
-df["Salaire"] = df["Salaire"].str.replace("€", "").str.replace(" ", "")
-df["Salaire"] = df["Salaire"].str.replace(".", "")
-df["Salaire"] = df["Salaire"].str.replace("M", "000000").str.replace("K","000")
-df["Salaire"] = pd.to_numeric(df["Salaire"], errors='coerce')
-df = df.dropna(subset=["Âge", "Taille", "Poids"])
-df[["Âge", "Taille", "Poids"]] = df[["Âge", "Taille", "Poids"]].astype(int)
+def clean_dataframe(df): 
+    df["Âge"] = pd.to_numeric(df["Âge"], errors='coerce')
+    df["Taille"] = pd.to_numeric(df["Taille"], errors='coerce')
+    df["Poids"] = pd.to_numeric(df["Poids"], errors='coerce')
+    df["Salaire"] = df["Salaire"].str.replace("€", "").str.replace(" ", "")
+    df["Salaire"] = df["Salaire"].str.replace(".", "")
+    df["Salaire"] = df["Salaire"].str.replace("M", "000000").str.replace("K","000")
+    df["Salaire"] = pd.to_numeric(df["Salaire"], errors='coerce')
+    df = df.dropna(subset=["Âge", "Taille", "Poids"])
+    df[["Âge", "Taille", "Poids"]] = df[["Âge", "Taille", "Poids"]].astype(int)
+    return df
 
  ##########################################################################################################
  #                                                                                                        #
@@ -45,10 +45,7 @@ df[["Âge", "Taille", "Poids"]] = df[["Âge", "Taille", "Poids"]].astype(int)
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
  
-# Barre latérale
 st.sidebar.header("Filtres")
-
-# Filtres pour les colonnes
 selection_equipe = st.sidebar.multiselect("Équipes", df["Équipe"].unique())
 
 # Filtrer le DataFrame en fonction des filtres
@@ -62,11 +59,8 @@ def ajouter_joueur(num,moy, joueur, equipe,selection, age, taille, poids, salair
     df = df.append(nouveau_joueur, ignore_index=True)
     collection.insert_one(nouveau_joueur)
     st.success("Le joueur a été ajouté avec succès !")
-    
-# Création d'un panneau dépliant dans la barre latérale
-with st.sidebar.expander("Ajouter un joueur"):
 
-    # Formulaire pour ajouter un joueur
+with st.sidebar.expander("Ajouter un joueur"):
     num = st.number_input("n° dans le classement", min_value=1, max_value=5000, value=10 , step=1)
     moy = st.number_input("note moyenne du joueur", min_value=0.0, max_value=10.0, value=5.5 , step=0.1)
     joueur = st.text_input("Joueur")
@@ -76,8 +70,7 @@ with st.sidebar.expander("Ajouter un joueur"):
     taille = st.number_input("Taille (cm)", min_value=0, max_value=300, value=170 , step=1)
     poids = st.number_input("Poids (kg)", min_value=0, max_value=500, value=70 , step=1)
     salaire = st.number_input("Salaire (€)", min_value=0)
-
-    # Bouton pour ajouter le joueur
+    
     if st.button("Ajouter"):
         if num and moy and joueur and equipe and selection and age and taille and poids and salaire: #Critères
             ajouter_joueur(num, moy, joueur, equipe, selection, age, taille, poids, salaire)
@@ -86,28 +79,26 @@ with st.sidebar.expander("Ajouter un joueur"):
 
 # Nombre de lignes à afficher par page
 nblignes = 100
-
 # Nombre total de pages
 total_pages = len(df) // nblignes + (len(df) % nblignes != 0)
 page_num = st.number_input("Page :", min_value=1, max_value=total_pages, value=1)
 
-# Fonction pour afficher le DataFrame en fonction du numéro de page
-def display_page(page_num):
+def display_app(page_num):
     start_idx = (page_num - 1) * nblignes
     end_idx = start_idx + nblignes
     st.table(df.iloc[start_idx:end_idx])
 
-# Affichage du tableau pour la page sélectionnée
+# Affichage du tableau en fonction de la page sélectionnée
 with st.expander("Afficher le tableau des données"):
-    display_page(page_num)
+    clean_dataframe(df)
+    display_app(page_num)
 
  ##########################################################################################################
  #                                                                                                        #
  #                                              GRAPHIQUES                                                #
  #                                                                                                        #
  ##########################################################################################################
-    
-# Ajouter une section de graphiques dans la barre latérale
+ 
 with st.sidebar.expander("Graphiques"):
     
     afficher_histoGraph_age = st.checkbox("Histogramme des âges")

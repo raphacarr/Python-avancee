@@ -25,7 +25,11 @@ Le projet est constitué de trois fichiers principaux :
 3. `config.py` : Ce fichier contient les informations de configuration pour se connecter à la base de données MongoDB.
 
 ## Utilisation
-
+Avant tout, pour lancer le scraper, exécutez la commande suivante dans votre terminal:
+```
+python .\scraper.py
+```
+Ensuite,
 Pour lancer l'application Streamlit, exécutez la commande suivante dans votre terminal :
 
 ```bash
