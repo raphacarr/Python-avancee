@@ -8,7 +8,12 @@ Assurez-vous d'avoir Python 3.x installé. Clonez ensuite le dépôt et installe
 
 ```bash
 git clone https://github.com/raphacarr/Python-avancee
-pip install -r requirements.txt 
+python requirements.py
+```
+
+Assurez vous également d'avoir mongoDB qui est activé sur votre machine et modifiez la ligne suivante en fonction de votre mongo : 
+```
+url = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.2"
 ```
 
 ## Structure du projet
